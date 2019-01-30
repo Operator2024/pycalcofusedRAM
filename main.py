@@ -8,10 +8,18 @@ variab = input("Enter process name as 'tasklist': ")
 proc = subprocess.Popen(["tasklist",'/FI',"IMAGENAME eq {0}".format(variab),"/FO","TABLE","/NH"],stdout=subprocess.PIPE,shell=True)
 data = proc.stdout.readlines()
 clearNum = 0
+
 for i in range(1,len(data)):
+    print(re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||"))
     # получаем число в виде строки и убираем запятую.
-    Num = re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[4]
-    clearNum +=int(re.sub(r",","",Num))
+    if( ("KB" in re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[5] or "КБ" in re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[5])
+        and (re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[5].isdigit() != True)):
+
+        Num = re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[4]
+        clearNum +=int(re.sub(r",","",Num))
+    else:
+        Num = re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[4] + re.sub(r"\s+", "||", data[i].decode("cp866").replace("\s", "")).split("||")[5]
+        clearNum += int(re.sub(r",", "", Num))
 
 
 with open(f'{variab[0:len(variab)-4]}.txt',"w") as file:

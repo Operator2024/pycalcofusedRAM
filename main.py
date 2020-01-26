@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Version 1.1.0
+# Version 1.1.1
 
 import os
 from time import sleep as delay
@@ -12,11 +12,13 @@ proc = Popen(["tasklist", '/FI', "IMAGENAME eq {0}".format(variab), "/FO", "TABL
 # data - contain strings receive from windows utility "Tasklist"
 data = proc.stdout.readlines()
 clearNumber = 0
-units_of_memory = ["KB", "K", "К", "КБ"]
+units_of_memory = {"en": ["K", "KB"],
+                   "ru": ["К", "КБ"]}
 statistic_storage = []
 longest_string = {}
-border_head = chr(9556) + "="*116 + chr(9559)
-border_bottom = chr(9562) + "="*116 + chr(9565)
+border_head = chr(9556) + "=" * 116 + chr(9559)
+border_bottom = chr(9562) + "=" * 116 + chr(9565)
+
 
 def detail_log(debug=0):
     with open(full_path + f'\\{variab[0:len(variab) - 4]}.txt', "w") as file:
@@ -43,16 +45,26 @@ for i in range(1, len(data)):
     # ==================================================================
     trigger = 0
     while trigger == 0:
+        dirty_string = sub(r"\s+", "||", data[i].decode("cp866").replace(r"\s", "")).split("||")
 
         for j in units_of_memory:
-            if (j in sub(r"\s+", "||", data[i].decode("cp866").replace(r"\s", "")).split("||")[5] and
-                    sub(r"\s+", "||", data[i].decode("cp866").replace(r"\s", "")).split("||")[5].isdigit() is not True):
-                dirty_number = sub(r"\s+", "||", data[i].decode("cp866").replace(r"\s", "")).split("||")[4]
-                clearNumber = int(sub(r",", "", dirty_number))
+            for k in units_of_memory[j]:
+                if k in dirty_string[5] and dirty_string[5].isdigit() is not True:
 
-                statistic_storage.append(clearNumber)
-                trigger = 1
-                break
+                    dirty_number = dirty_string[4]
+                    clearNumber = int(sub(r",", "", dirty_number))
+
+                    statistic_storage.append(clearNumber)
+                    trigger = 1
+                    break
+                elif k in dirty_string[6] and dirty_string[6].isdigit() is not True:
+
+                    dirty_number = dirty_string[4] + dirty_string[5]
+                    clearNumber = int(sub(r",", "", dirty_number))
+
+                    statistic_storage.append(clearNumber)
+                    trigger = 1
+                    break
 
         if trigger != 1:
             print(f"Received value from \"Tasklist\" doesn't contain units - {units_of_memory}")
@@ -77,8 +89,8 @@ if len(statistic_storage) != 0:
 
     print(border_head)
 
-    a_1 = chr(9553) + " " +share_output_text
-    a_2 =f"║ Detail info available by path \'{full_path}\' in file \'{variab[0:len(variab) - 4]}.txt\' "
+    a_1 = chr(9553) + " " + share_output_text
+    a_2 = f"║ Detail info available by path \'{full_path}\' in file \'{variab[0:len(variab) - 4]}.txt\' "
     a_3 = f"║ Bye!"
 
     longest_string["a_1"] = len(a_1)
@@ -89,7 +101,7 @@ if len(statistic_storage) != 0:
         if length_head > longest_string[i]:
             if i == "a_1":
                 space = (length_head - longest_string[i]) - 1
-                a_1 = a_1 + " "*space + "║"
+                a_1 = a_1 + " " * space + "║"
             elif i == "a_2":
                 space = (length_head - longest_string[i]) - 1
                 a_2 = a_2 + " " * space + "║"
@@ -102,6 +114,5 @@ if len(statistic_storage) != 0:
 
 elif len(statistic_storage) == 0:
     print("INFO: No tasks are running which match the specified criteria.")
-
 
 delay(10)

@@ -2,7 +2,7 @@
 # PyCalc_of_Used_RAM
 
 ## How to use? What OS are supported?
--  Download **exe** file from [releases](https://github.com/Operator2024/pycalcofusedRAM/releases) or **python script**.
+-  Download **exe** file from [releases](https://github.com/Operator2024/pycalcofusedRAM/releases/tag/1.1.1) or **python script**.
 -  Run and enter tne name of the process you want to check
 
    | Supported OS |
